@@ -1,0 +1,105 @@
+#!/bin/bash
+
+function appendHelp {
+    echo "Syntax: edit-file <file> <search/placement> [placement]"
+}
+
+function appendLine {
+    FILE="$1"
+    SEARCH="$2"
+    PLACE="$3"
+
+    if [ -z "$SEARCH" ]; then
+        appendHelp
+        exit 1
+    fi
+
+    if [ -z "$FILE" ]; then
+        appendHelp
+        exit 1
+    fi
+
+    if [ -z "$PLACE" ]; then
+        PLACE="$SEARCH"
+    fi
+
+    echo Try append "$SEARCH" to file "$FILE"
+    if [ -f "$FILE" ]; then
+        grep -qxF "$SEARCH" "$FILE" || echo "$PLACE" >> "$FILE"
+    else
+        echo create file "$FILE"
+        echo "$PLACE" > "$FILE"
+    fi
+}
+
+function replaceHelp {
+    echo "Syntax: edit-file <file> <search> <replacement>"
+}
+
+function replaceLine {
+    FILE="$1"
+    SEARCH="$2"
+    PLACE="$3"
+
+    if [ -z "$SEARCH" ]; then
+        replaceHelp
+        exit 1
+    fi
+
+    if [ -z "$FILE" ]; then
+        replaceHelp
+        exit 1
+    fi
+
+    if [ -z "$PLACE" ]; then
+        replaceHelp
+        exit 1
+    fi
+
+    echo Try replace "$SEARCH" in file "$FILE"
+    if [ -f "$FILE" ]; then
+        sed -i "s|$SEARCH|$PLACE|g" "$FILE"
+    fi
+}
+
+function removeHelp {
+    echo "Syntax: edit-file remove <file> <search>"
+}
+
+function removeLine {
+    FILE="$1"
+    SEARCH="$2"
+
+    if [ -z "$SEARCH" ]; then
+        replaceHelp
+        exit 1
+    fi
+
+    if [ -z "$FILE" ]; then
+        replaceHelp
+        exit 1
+    fi
+
+    echo Try remove "$SEARCH" in file "$FILE"
+    if [ -f "$FILE" ]; then
+        sed -i "s|$SEARCH||g" "$FILE"
+    fi
+}
+
+case $1 in
+	append)
+		appendLine "$2" "$3" "$4"
+		;;
+
+	replace)
+		replaceLine "$2" "$3" "$4"
+		;;
+
+	remove)
+		removeLine "$2" "$3"
+		;;
+
+	*)
+		echo $"Usage: edit-file {append|replace|remove} <file> Options..."
+		exit 1
+esac
